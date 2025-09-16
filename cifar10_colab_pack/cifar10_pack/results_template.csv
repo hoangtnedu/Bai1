@@ -1,0 +1,1 @@
+model,dataset,epochs,batch,opt,lr0,wd,sched,aug,seed,val_best_acc,test_acc,test_f1,params_m,flops_g,latency_cpu_ms,latency_gpu_ms,notes

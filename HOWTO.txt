@@ -1,0 +1,42 @@
+
+CIFAR-10 EXPERIMENT PACK (EAUT Journal Ready)
+=============================================
+
+This pack includes:
+- train_cifar10.py : Training script for multiple CNNs on CIFAR-10 (PyTorch).
+- eval_cifar10.py  : Evaluation script (test set metrics + confusion matrix, latency).
+- models_simple.py : SimpleCNN baseline definition.
+- results_template.csv : CSV header for aggregating results across runs.
+- HOWTO.txt        : This file.
+
+Quick Start (on a machine with Python 3.9+, PyTorch, torchvision, scikit-learn, matplotlib):
+-------------------------------------------------------------------------------------------
+1) Install:
+   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+   pip install scikit-learn matplotlib pandas thop  # 'thop' is optional for FLOPs
+
+2) Train baseline (SimpleCNN, 100 epochs, AMP if CUDA available):
+   python train_cifar10.py --model simplecnn --epochs 100 --batch 128 \
+     --opt sgd --lr 0.1 --wd 5e-4 --sched cosine --amp --outdir runs/simplecnn_c10
+
+3) Train ResNet-18 / MobileNetV2 / EfficientNet-B0 / VGG11-BN:
+   python train_cifar10.py --model resnet18    --epochs 100 --batch 128 --opt sgd --lr 0.1  --wd 5e-4 --sched cosine --amp --outdir runs/resnet18_c10
+   python train_cifar10.py --model mobilenetv2 --epochs 100 --batch 128 --opt adamw --lr 3e-4 --wd 1e-4 --sched cosine --amp --outdir runs/mobilenetv2_c10
+   python train_cifar10.py --model efficientnet_b0 --epochs 100 --batch 128 --opt adamw --lr 3e-4 --wd 1e-4 --sched cosine --amp --outdir runs/effnetb0_c10
+   python train_cifar10.py --model vgg11_bn    --epochs 100 --batch 128 --opt sgd --lr 0.1  --wd 5e-4 --sched cosine --amp --outdir runs/vgg11bn_c10
+
+4) Evaluate a checkpoint (computes Accuracy, F1-macro, Confusion Matrix, latency, params/FLOPs):
+   python eval_cifar10.py --checkpoint runs/resnet18_c10/best.pt --model resnet18 --outdir runs/resnet18_c10
+
+5) Aggregate results:
+   Append each run's summary (printed by scripts) to results_template.csv.
+
+Reproducibility:
+- train/val/test splits are fixed via a seed.
+- All hyper-parameters are logged to outdir/hparams.json and per-epoch logs to outdir/train_log.csv.
+- Best checkpoint selected by highest validation accuracy.
+
+Notes:
+- FLOPs require 'thop'. If not installed, script will skip FLOPs gracefully.
+- Latency is measured with torch.no_grad() over multiple warmup/measure iters (both CPU/GPU if available).
+- To speed up: use AMP, set num_workers>0 (e.g., 4), enable cudnn.benchmark=True.

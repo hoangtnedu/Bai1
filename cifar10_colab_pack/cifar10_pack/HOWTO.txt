@@ -1,0 +1,1 @@
+See README in your chat. Use train_cifar10.py and eval_cifar10.py on Colab.
